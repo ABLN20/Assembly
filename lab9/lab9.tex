@@ -1,0 +1,90 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{fullpage}
+\usepackage[top=2cm, bottom=4.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{lastpage}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{tabularray}
+
+\hypersetup{%
+  colorlinks=true,
+  linkcolor=blue,
+  linkbordercolor={0 0 1}
+}
+ 
+\renewcommand\lstlistingname{Algorithm}
+\renewcommand\lstlistlistingname{Algorithms}
+\def\lstlistingautorefname{Alg.}
+
+\lstdefinestyle{Python}{
+    language        = Python,
+    frame           = lines, 
+    basicstyle      = \footnotesize,
+    keywordstyle    = \color{blue},
+    stringstyle     = \color{green},
+    commentstyle    = \color{red}\ttfamily
+}
+
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+
+% Edit these as appropriate
+\newcommand\course{CSE 3666}
+\newcommand\hwnumber{9}                  % <-- homework number
+\newcommand\NetIDa{alb20017}           % <-- NetID of person #1
+
+\pagestyle{fancyplain}
+\headheight 35pt
+\lhead{\NetIDa}
+\chead{\textbf{\Large Lab \hwnumber}}
+\rhead{\course \\ \today}
+\lfoot{}
+\cfoot{}
+\rfoot{\small\thepage}
+\headsep 1.5em
+
+\begin{document}
+\section*{Question 1}
+Block offset: 2 bits (cache block size is 4 ), cach index: 3 bits (8 blocks), tag: 32 bits
+\newline 
+Cache index for the first two is 0 because both are in block 0. Cache tag wont change until it has gone through all blocks, block offset will incriment 4 times per block
+\newline 
+The hit miss outcome was .75 hit rate. It would miss once then hit three times, then repeat. 
+% \usepackage{tabularray}
+\begin{table}
+\centering
+\begin{tblr}{
+}
+Address    & Cache index & tag        & Block offset & Hit/Miss \\
+0x10010000 & 0           & 0x00200200 & 0            & Miss     \\
+0x10010004 & 0           & 0x00200200 & 1            & Hit      \\
+0x10010008 & 0           & 0x00200200 & 2            & Hit      \\
+0x1001000c & 0           & 0x00200200 & 3            & Hit      \\
+0x10010010 & 1           & 0x00200200 & 0            & Miss     \\
+0x10010014 & 1           & 0x00200200 & 1            & Hit      
+\end{tblr}
+\end{table}
+\section*{Question 2}
+I did not predict all the hit rates correctly, I did not assume for them to just jump at the 64 blocks, I thought it would grow in a linear way. If the size of warray is doubled, the 64 block size row will have different data, it will have a 75 hit rate instead,
+\begin{table}
+\centering
+\begin{tabular}{llll}
+Number of blocks & Cache size(bytes) & Hit rate(\%) & Miss count  \\
+8                & 128               & 75           & 3072        \\
+16               & 256               & 75           & 3072        \\
+32               & 512               & 75           & 3072        \\
+64               & 1024              & 99           & 64          \\
+128              & 2048              & 99           & 64         
+\end{tabular}
+\end{table}
+
+\end{document}
