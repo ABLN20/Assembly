@@ -1,0 +1,367 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{fullpage}
+\usepackage[top=2cm, bottom=4.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{lastpage}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{enumitem}
+
+\hypersetup{%
+  colorlinks=true,
+  linkcolor=blue,
+  linkbordercolor={0 0 1}
+}
+ 
+\renewcommand\lstlistingname{Algorithm}
+\renewcommand\lstlistlistingname{Algorithms}
+\def\lstlistingautorefname{Alg.}
+
+\lstdefinestyle{Python}{
+    language        = Python,
+    frame           = lines, 
+    basicstyle      = \footnotesize,
+    keywordstyle    = \color{blue},
+    stringstyle     = \color{green},
+    commentstyle    = \color{red}\ttfamily
+}
+
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+
+% Edit these as appropriate
+\newcommand\course{CSE 3666}
+\newcommand\hwnumber{2}                  % <-- homework number
+\newcommand\NetIDa{alb20017}           % <-- NetID of person #1
+
+\pagestyle{fancyplain}
+\headheight 35pt
+\lhead{\NetIDa}
+\chead{\textbf{\Large Homework \hwnumber}}
+\rhead{\course \\ \today}
+\lfoot{}
+\cfoot{}
+\rfoot{\small\thepage}
+\headsep 1.5em
+
+\begin{document}
+
+\section*{Question 1}
+
+\begin{enumerate}[label=\alph*]
+  \item
+    \lstset{label={lst:alg1}}
+     \begin{lstlisting}[style = Python]
+# RISC-V code
+	addi 	s4, x0, 100
+	addi 	s1, x0, 0
+
+loop:
+	slli 	t0, s1, 2 	# t0 = i * 4
+	add 	t2, t0, s2 	# compute addr of A[i]
+	lw 	t1, 0(t2)
+	addi	t1, t1, 4	# add 4 to A[i]
+	add 	t3, t0, s3 	# compute addr of B[i]
+	sw 	t1, 0(t3)
+	addi 	s1, s1, 1
+	
+test: 	bne s1, s4, loop 	# 8 instructions in the loop
+    \end{lstlisting}
+
+The amount of instructions that will run is 802. There are 8 instructions per loop, and 100 loops, plus the 2 initializing functions, resulting in 802 instructions total. The change that needed to be made was to add 4 to A[i] before loading it into B[i].
+
+\newpage
+  \item
+    \lstset{label={lst:alg1}}
+     \begin{lstlisting}[style = Python]
+# RISC-V code
+	addi 	s4, x0, 100
+	addi 	s1, x0, 0
+
+loop:
+	# B[i] = A[i] + 4;
+	slli 	t0, s1, 2 	# t0 = i * 4
+	add 	t2, t0, s2 	# compute addr of A[i]
+	lw 	t1, 0(t2)
+	addi	t1, t1, 4	# add 4 to A[i]
+	add 	t3, t0, s3	# compute addr of B[i]
+	sw 	t1, 0(t3)
+	
+	# B[i+1] = A[i+1] + 4;
+	lw 	t1, 4(t2)	# A[i+1]
+	addi	t1, t1, 4	# add 4 to A[i+1]
+	sw 	t1, 4(t3)	# B[i+1] = A[i+1] + 4;
+
+	# B[i+2] = A[i+2] + 4;
+	lw 	t1, 8(t2)	# A[i+2]
+	addi	t1, t1, 4	# add 4 to A[i+2]
+	sw 	t1, 8(t3)	# B[i+2] = A[i+2] + 4;
+	
+	# B[i+3] = A[i+3] + 4;
+	lw 	t1, 12(t2)	# A[i+3]
+	addi	t1, t1, 4	# add 4 to A[i+3]
+	sw 	t1, 12(t3)	# B[i+3] = A[i+3] + 4;
+	
+	addi 	s1, s1, 4	# incriment by 4 each iteration
+	
+test: 	bne s1, s4, loop 	# 17 instructions in the loop
+    \end{lstlisting}
+
+The amount of instructions that will run is 427. There are 17 instructions per loop, and 25 loops, plus the 2 initializing functions, resulting in 427 instructions total. The code simply adjusts the offsets by 4 for each increase in index for A and B this works because their addresses are calculated at the beginning of each iteration, so the next element in them 4 bytes later. 
+
+\end{enumerate}
+
+\newpage
+
+\section*{Question 2}
+
+
+
+    \lstset{label={lst:alg1}}
+     \begin{lstlisting}[style = Python]
+	# init iloop iterators
+	addi 	s0, x0, 0		# s0=i=0
+	addi 	s1, x0, 16		# s1=16
+iloop:
+	# init jloop iterators
+	addi 	s2, x0, 0		# s2=j=0
+	addi 	s3, x0, 8		# s3=8
+jloop:
+	slli	t0, s0, 8		# t0 = 256 * i
+	add 	t0, t0, s2		# t0 = 256 * i + j
+	
+	# calculate offset
+	slli	t1, s0, 5		# t1 = i * 8 * 4 = i offset
+	slli	t2, s2, 2		# t2 = j * 4
+	add	t1, t1, t2		# t1 = total offset = i offset + j offset
+	add	t1, t1, s9		# t1 = address of T[i][j]
+	sw	t0, 0(t1)		# T[i][j] = 256 * i + j;
+
+	addi	s2, s2 1		# incriment j
+	bne 	s2, s3 iloop		# jloop if j!=8
+	
+	addi	s0, s0 1		# incriment i
+	bne 	s0, s1 iloop		# iloop if i!=16
+
+    \end{lstlisting}
+Each loop's iterators are initialized before the loop is executed. At the end of the loop it incriments the iterator and checks if it is the last one, if so it will not start another loop. I calculated the location T[i][j] with the formula: (T address) + ( i * 8 * 4) + (j * 4). This works because i * 8 will calculate how many rows in, and multiply by 4 to account for the size of each element being 4 bytes, then add j to the row, again multiplying by 4 to account for the size, this will get the offset so all that needs to be done is to add it to the address of T.
+
+\newpage
+\section*{Question 3}
+
+    \lstset{label={lst:alg1}}
+     \begin{lstlisting}[style = Python]
+# Addition of decimal strings
+
+# strings are stored in global data section 
+        .data   
+dst:    .space  128
+str1:   .space  128
+str2:   .space  128
+
+# instructions are in text section
+        .text
+main: 
+        # load adresses of strings into s1, s2, and s3
+        # s3 is dst, where we store the result 
+
+        lui     s3, 0x10010 
+        addi    s1, s3, 128
+        addi    s2, s1, 128
+
+        # read the first number as a string
+        addi    a0, s1, 0
+        addi    a1, x0, 100
+        addi    a7, x0, 8
+        ecall
+
+        # read the second number as a string
+        addi    a0, s2, 0
+        addi    a1, x0, 100
+        addi    a7, x0, 8
+        ecall
+
+        # useful constants
+        addi    a4, x0, 0
+        addi    a5, x0, 10
+
+        #TODO
+        # write a loop to find out the number of decimal digits in str1
+        # the loop searches for the first character that is less than '0' 
+        add	t0, x0, s1
+count_digits:
+	lb	t1, 0(t0)		# load current byte
+	addi	t0, t0, 1
+	bgt	t1, a4,	count_digits
+	addi	t0, t0, -2
+	sub	t0, t0, s1		# t0 = digits
+	
+	
+	
+	add	s4, t0, s3	# s4 = s3 address
+	sb	a4, 0(s4)
+	add	s1, t0, s1
+	add	s2, t0, s2
+	add	t5, x0, x0	# t5 = iterator
+	add	s9, x0, x0	# x9 = carry
+	addi	s1, s1, -1
+	addi	s2, s2, -1
+	addi	s4, s4, -1
+addloop:
+	beq	t5, t0, print
+	# t1 = digit from s1
+        lb	t1, 0(s1)
+        addi	t1, t1, -48
+        # t2 = digit from s2
+        lb	t2, 0(s2)
+	addi	t2, t2, -48
+        # t3 = sum
+        add	t3, t1, t2
+        add	t3, t3, s9
+        
+	bge	t3, a5, carry
+	addi	t3, t3, 48
+	sb	t3, 0(s4)
+	addi	s9, x0, 0
+	beq	x0, x0, incriment
+
+carry:
+        addi	t3, t3, 38
+        sb	t3, 0(s4)
+	addi	s9, x0, 1
+
+incriment:
+	addi	s1, s1, -1
+	addi	s2, s2, -1
+	addi	s4, s4, -1
+	addi	t5, t5, 1
+	beq	x0, x0, addloop
+
+print:
+        addi    a0, s3, 0
+        addi    a7, x0, 4
+        ecall
+
+        # exit
+        addi    a7, x0, 10
+        ecall
+
+
+    \end{lstlisting}
+The addition is done by starting at the last byte of each adress s1 and s2, found by counting the amount of digits in each. Then iterate backwards to the start, converting each byte to an integer and adding them then saving them back as a string character, keeping track of the carry for the next iteration. 
+
+
+\section*{Question 4}
+
+\begin{enumerate}
+\item
+Instruction: or s1, s2, s3
+\\Find out register numbers: or x9, x18, x19
+\\It is an R-type instruction
+\\funct7: 0000000
+\\opcode: 0110011
+\\rd: 01001
+\\funct3: 110
+\\rs1: 10010
+\\rs2: 10011
+\\machine code in bits: 00000001001110010110010010110011
+\\machine code in hex: 013964b3
+
+\item
+Instruction: slli t1, t2, 16
+\\Find out register numbers: slli x6, x7, 16
+\\It is an I-type instruction
+\\Immediate: 000000010000
+\\opcode: 0010011
+\\rd: 00110
+\\funct3: 001
+\\rs1: 00111
+\\machine code in bits: 00000001000000111001001100010011
+\\machine code in hex: 01039313
+
+\item
+Instruction: xori x1, x1, -1
+\\Find out register numbers: xori x1, x1, -1
+\\It is an I-type instruction
+\\Immediate: 111111111111
+\\opcode: 0010011
+\\rd: 00001
+\\funct3: 100
+\\rs1: 00001
+\\machine code in bits: 11111111111100001100000010010011
+\\machine code in hex: fff0c093
+
+\item
+Instruction: lw x2, -100(x3)
+\\Find out register numbers: lw x2, -100(x3)
+\\It is an I-type instruction
+\\Immediate: 111110011100
+\\opcode: 0000011
+\\rd: 00010
+\\funct3: 010
+\\rs1: 00011
+\\machine code in bits: 11111001110000011010000100000011
+\\machine code in hex: f9cla103
+
+\end{enumerate}
+
+\section*{Question 5}
+\begin{enumerate}
+\item
+Instruction: sw x10,-16(x25)
+\\Find out register numbers: sw x10,-16(x25)
+\\It is an S-type instruction
+\\Immediate: 111111110000
+\\opcode: 0100011
+\\funct3: 010
+\\rs1: 11001
+\\rs2: 01010
+\\machine code in bits: 11111110101011001010100000100011
+\\machine code in hex: feaca823
+
+\item
+Instruction: addi x14,x4,64
+\\Find out register numbers: addi x14,x4,64
+\\It is an I-type instruction
+\\Immediate: 000001000000
+\\opcode: 0010011
+\\rd: 01110
+\\funct3: 000
+\\rs1: 00100
+\\machine code in bits: 00000100000000100000011100010011
+\\machine code in hex: 04020713
+
+\item
+Instruction: and x23,x10,x5
+\\Find out register numbers: and x23,x10,x5
+\\It is an I-type instruction
+\\funct7: 0000000
+\\opcode: 0110011
+\\rd: 10111
+\\funct3: 111
+\\rs1: 01010
+\\rs2: 00101
+\\machine code in bits: 00000000010101010111101110110011
+\\machine code in hex: 00557bb3
+
+\item
+Instruction: srai x30,x31,20
+\\Find out register numbers: srai x30,x31,20
+\\It is an I-type instruction
+\\Immediate: 010000010100
+\\opcode: 0010011
+\\rd: 11110
+\\funct3: 101
+\\rs1: 11111
+\\machine code in bits: 01000001010011111101111100010011
+\\machine code in hex: 414fdf13
+\end{enumerate}
+
+
+\end{document}

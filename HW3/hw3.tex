@@ -1,0 +1,206 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{fullpage}
+\usepackage[top=2cm, bottom=4.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{amsmath,amsthm,amsfonts,amssymb,amscd}
+\usepackage{lastpage}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{mathrsfs}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{enumitem}
+
+\hypersetup{%
+  colorlinks=true,
+  linkcolor=blue,
+  linkbordercolor={0 0 1}
+}
+ 
+\renewcommand\lstlistingname{Algorithm}
+\renewcommand\lstlistlistingname{Algorithms}
+\def\lstlistingautorefname{Alg.}
+
+\lstdefinestyle{Python}{
+    language        = Python,
+    frame           = lines, 
+    basicstyle      = \footnotesize,
+    keywordstyle    = \color{blue},
+    stringstyle     = \color{green},
+    commentstyle    = \color{red}\ttfamily
+}
+
+\setlength{\parindent}{0.0in}
+\setlength{\parskip}{0.05in}
+
+% Edit these as appropriate
+\newcommand\course{CSE 3666}
+\newcommand\hwnumber{2}                  % <-- homework number
+\newcommand\NetIDa{alb20017}           % <-- NetID of person #1
+
+\pagestyle{fancyplain}
+\headheight 35pt
+\lhead{\NetIDa}
+\chead{\textbf{\Large Homework \hwnumber}}
+\rhead{\course \\ \today}
+\lfoot{}
+\cfoot{}
+\rfoot{\small\thepage}
+\headsep 1.5em
+
+\begin{document}
+
+\section*{Question 1}
+
+    \lstset{label={lst:alg1}}
+     \begin{lstlisting}[style = Python]
+foo:
+	add	s1, x0, x0	# count = s1 = 0
+	add	s2, x0, x0	# i = s2 = 0
+	add	s3, a0, x0	# d = s3 = a0
+	add	s4, a1, x0	# n = s4 = a1
+	
+forloop:
+	beq	s2, s4, done	# once looping done go to done
+	
+	slli	a0, s2, 2	# a0 = &d[i]
+	sub	a1, s4, s2	# a1 = n-i
+	add	s5, ra, x0	# save foo ra in s5 before bar call
+	jal	ra, bar		# call bar after setting a0 and a1 first
+	add	ra, s5, x0	# set ra back
+	blt	x0, s6, incriment	# assume bar saves t to s6
+	addi	s2, s2, 1	# i+=1
+	beq	x0, x0, forloop
+
+icriment:
+	addi	s1, s1, 1	# count += 1
+	addi	s2, s2, 1	# i+=1
+	beq	x0, x0, forloop
+	
+done:
+	jalr x0, ra, 0
+
+ \end{lstlisting}
+
+\newpage
+
+\section*{Question 2}
+
+
+
+    \lstset{label={lst:alg1}}
+     \begin{lstlisting}[style = Python]
+msort:
+    addi 	sp, sp, -16   # Make space on stack for 4 registers (4 * 4 bytes each)
+
+    sw 		ra, 0(sp)       # Save return address
+    sw 		s0, 4(sp)       # Save s0 register
+    sw 		s1, 8(sp)       # Save s1 register
+    sw 		s2, 12(sp)      # Save s2 register
+
+
+    lw 		s0, 0(a0)       # s0 = d (array to be sorted)
+    lw		s1, 4(a0)       # s1 = n (size of the array)
+
+
+    addi 	t1, x0, 1
+    bge 	s1, done
+
+    srli 	s2, s1, 1      # s2 = n / 2 (n1)
+    add 	s2, s0, s2      # s2 = &d[n1]
+
+    jal 	ra, msort       # msort(d, n1)
+    add 	a0, s2, x0           # Set new arguments for the second recursive call
+    sub 	a1, s1, s2      # n - n1
+    jal 	ra, msort       # msort(&d[n1], n - n1)
+
+
+    lw 		a0, 0(sp)        # Restore d
+    lw 		a1, 8(sp)        # Restore n1
+    lw 		a2, 12(sp)       # Restore &d[n1]
+    jal 	ra, merge       # merge(c, d, n1, &d[n1], n - n1)
+
+
+    lw 		a0, 0(sp)        # Restore d
+    lw 		a1, 4(sp)        # Restore c
+    lw 		a2, 8(sp)        # Restore n
+    jal 	ra, copy        # copy(d, c, n)
+
+    exit:
+    lw 		ra, 0(sp)        # Restore return address
+    lw 		s0, 4(sp)        # Restore s0 register
+    lw 		s1, 8(sp)        # Restore s1 register
+    lw 		s2, 12(sp)       # Restore s2 register
+
+    addi sp, sp, 16
+
+    \end{lstlisting}
+
+\newpage
+\section*{Question 3}
+
+\begin{enumerate}
+\item
+BGE x10, x20, I100
+\\It is an SB-type instruction
+\\imm: 000010110100
+\\opcode: 1100011
+\\funct3: 101
+\\rs1: 01010
+\\rs2: 10100
+\\machine code in bits: 00010111010001010101010001100011		          
+\\machine code in hex: 17455463
+
+\item
+BEQ x10, x0, I1
+\\It is an SB-type instruction
+\\imm: 111111101100
+\\opcode: 1100011
+\\funct3: 000
+\\rs1: 01010
+\\rs2: 00000
+\\machine code in bits: 11111100000001010000110011100011
+\\machine code in hex: FC050CE3
+
+\item
+JAL x0, I100
+\\It is an UJ-type instruction
+\\imm: 11111111111110110000
+\\opcode: 1101111
+\\rd: 00000
+\\machine code in bits: 11110110000111111111000001101111
+\\machine code in hex: F61FF06F
+
+\end{enumerate}
+\newpage
+\section*{Question 4}
+\begin{enumerate}
+\item
+BEQ x20, x21, -600
+\\It is an SB-type instruction
+\\imm: 111011010100
+\\opcode: 1100011
+\\funct3: 000
+\\rs1: 10100
+\\rs2: 10101
+\\machine code in bits: 1101101 10101 10100 000 01001 1100011
+\\machine code in hex: DB5A04E3
+\\ offset = 111011010100(0) = -600
+\\ 0x0400366C - 600 = 0x04003414
+
+\item
+JAL x9, 
+\\It is an UJ-type instruction
+\\imm: 11111111111111010100
+\\opcode: 1100011
+\\rd: 01001
+\\machine code in bits: 1 1111010100 1 11111111 00001 1101111
+\\machine code in hex: FA9FF0EF
+\\ offset = 11111111111111010100(0) = -88
+\\ 0x04208888 - 88 = 0x04208830
+\end{enumerate}
+
+
+\end{document}
